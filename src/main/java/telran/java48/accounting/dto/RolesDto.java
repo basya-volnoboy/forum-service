@@ -8,7 +8,7 @@ import lombok.Singular;
 
 @Getter
 @Builder
-public class UserChangeRoleDto {
+public class RolesDto {
 	String login;
     @Singular
     Set<String> roles;

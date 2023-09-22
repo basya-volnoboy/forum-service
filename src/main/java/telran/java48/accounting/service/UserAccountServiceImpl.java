@@ -1,24 +1,25 @@
 package telran.java48.accounting.service;
 
 
+import org.mindrot.jbcrypt.BCrypt;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
-import telran.java48.accounting.dao.UserRepository;
-import telran.java48.accounting.dto.UserChangeRoleDto;
+import telran.java48.accounting.dao.UserAccountRepository;
+import telran.java48.accounting.dto.RolesDto;
 import telran.java48.accounting.dto.UserDto;
 import telran.java48.accounting.dto.UserRegisterDto;
-import telran.java48.accounting.dto.UserUpdateDto;
+import telran.java48.accounting.dto.UserEditDto;
 import telran.java48.accounting.dto.exeptions.UserExistsExceprion;
 import telran.java48.accounting.dto.exeptions.UserNotFoundException;
-import telran.java48.accounting.model.User;
+import telran.java48.accounting.model.UserAccount;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService{
+public class UserAccountServiceImpl implements UserAccountService{
 	
-	final UserRepository userRepository;
+	final UserAccountRepository userRepository;
 	final ModelMapper modelMapper;
 	
 	@Override
@@ -27,8 +28,10 @@ public class UserServiceImpl implements UserService{
 		if(userRepository.existsById(userRegisterDto.getLogin())) {
 			throw new UserExistsExceprion();
 		}
-		User user = modelMapper.map(userRegisterDto, User.class);
+		UserAccount user = modelMapper.map(userRegisterDto, UserAccount.class);
 		user.addRole("USER");
+		String password= BCrypt.hashpw(userRegisterDto.getPassword(), BCrypt.gensalt());//генерирует случайный стринг- соль на базе которого будет шифровать пароль
+		user.setPassword(password);
 		userRepository.save(user);
 		return modelMapper.map(user, UserDto.class);
 	}
@@ -42,14 +45,14 @@ public class UserServiceImpl implements UserService{
 
 	@Override
 	public UserDto deleteUser(String login) {
-		User user = userRepository.findById(login).orElseThrow(()-> new UserNotFoundException());
+		UserAccount user = userRepository.findById(login).orElseThrow(()-> new UserNotFoundException());
 		userRepository.delete(user);
 		return modelMapper.map(user, UserDto.class);
 	}
 
 	@Override
-	public UserDto updateUser(String login, UserUpdateDto userUpdateDto) {
-		User user = userRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
+	public UserDto updateUser(String login, UserEditDto userUpdateDto) {
+		UserAccount user = userRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
 		String firstName = userUpdateDto.getFirstName();
 		if (firstName != null) {
 			user.setFirstName(firstName);
@@ -63,8 +66,8 @@ public class UserServiceImpl implements UserService{
 	}
 
 	@Override
-	public UserChangeRoleDto changeRoleList(String login, String role, boolean isAddRole) {
-		User user = userRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
+	public RolesDto changeRoleList(String login, String role, boolean isAddRole) {
+		UserAccount user = userRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
 		boolean res;
 		if(isAddRole) {
 			res = user.addRole(role);
@@ -74,27 +77,13 @@ public class UserServiceImpl implements UserService{
 		if(res) {
 			userRepository.save(user);
 		}
-		return modelMapper.map(user, UserChangeRoleDto.class);
+		return modelMapper.map(user, RolesDto.class);
 	}
-//	@Override
-//	public UserChangeRoleDto addRole(String login, String role) {
-//		User user = userRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
-//		user.addRole(role);
-//		userRepository.save(user);
-//		return modelMapper.map(user, UserChangeRoleDto.class);
-//	}
-//
-//	@Override
-//	public UserChangeRoleDto deleteRole(String login, String role) {
-//		User user = userRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
-//		user.deleteRole(role);
-//		userRepository.save(user);
-//		return modelMapper.map(user, UserChangeRoleDto.class);
-//	}
+
 
 	@Override
 	public void changePassword(String login, String newPassword) {
-		User user = userRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
+		UserAccount user = userRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
 		user.setPassword(newPassword);
 		userRepository.save(user);
 	}
@@ -102,7 +91,7 @@ public class UserServiceImpl implements UserService{
 
 	@Override
 	public UserDto getUser(String login) {
-		User user = userRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
+		UserAccount user = userRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
 		return modelMapper.map(user, UserDto.class);
 	}
 
