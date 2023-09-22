@@ -19,80 +19,81 @@ import telran.java48.accounting.model.UserAccount;
 @RequiredArgsConstructor
 public class UserAccountServiceImpl implements UserAccountService{
 	
-	final UserAccountRepository userRepository;
+	final UserAccountRepository userAccountRepository;
 	final ModelMapper modelMapper;
 	
 	@Override
 	public UserDto register(UserRegisterDto userRegisterDto) {
 		
-		if(userRepository.existsById(userRegisterDto.getLogin())) {
+		if(userAccountRepository.existsById(userRegisterDto.getLogin())) {
 			throw new UserExistsExceprion();
 		}
-		UserAccount user = modelMapper.map(userRegisterDto, UserAccount.class);
-		user.addRole("USER");
+		UserAccount userAccount = modelMapper.map(userRegisterDto, UserAccount.class);
+		userAccount.addRole("USER");
 		String password= BCrypt.hashpw(userRegisterDto.getPassword(), BCrypt.gensalt());//генерирует случайный стринг- соль на базе которого будет шифровать пароль
-		user.setPassword(password);
-		userRepository.save(user);
-		return modelMapper.map(user, UserDto.class);
+		userAccount.setPassword(password);
+		userAccountRepository.save(userAccount);
+		return modelMapper.map(userAccount, UserDto.class);
 	}
 
-	@Override
-	public UserDto login() {
-		// TODO Auto-generated method stub
-		//////////////////////////////////
-		return null;
-	}
+//	@Override
+//	public UserDto login() {
+//		// TODO Auto-generated method stub
+//		//////////////////////////////////
+//		return null;
+//	}
 
 	@Override
 	public UserDto deleteUser(String login) {
-		UserAccount user = userRepository.findById(login).orElseThrow(()-> new UserNotFoundException());
-		userRepository.delete(user);
-		return modelMapper.map(user, UserDto.class);
+		UserAccount userAccount = userAccountRepository.findById(login).orElseThrow(()-> new UserNotFoundException());
+		userAccountRepository.delete(userAccount);
+		return modelMapper.map(userAccount, UserDto.class);
 	}
 
 	@Override
-	public UserDto updateUser(String login, UserEditDto userUpdateDto) {
-		UserAccount user = userRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
-		String firstName = userUpdateDto.getFirstName();
+	public UserDto updateUser(String login, UserEditDto userEditDto) {
+		UserAccount userAccount = userAccountRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
+		String firstName = userEditDto.getFirstName();
 		if (firstName != null) {
-			user.setFirstName(firstName);
+			userAccount.setFirstName(firstName);
 		}
-		String lastName = userUpdateDto.getLastName();
+		String lastName = userEditDto.getLastName();
 		if (lastName != null) {
-			user.setLastName(lastName);
+			userAccount.setLastName(lastName);
 		}
-		userRepository.save(user);
-		return modelMapper.map(user, UserDto.class);
+		userAccountRepository.save(userAccount);
+		return modelMapper.map(userAccount, UserDto.class);
 	}
 
 	@Override
 	public RolesDto changeRoleList(String login, String role, boolean isAddRole) {
-		UserAccount user = userRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
+		UserAccount userAccount = userAccountRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
 		boolean res;
 		if(isAddRole) {
-			res = user.addRole(role);
+			res = userAccount.addRole(role);
 		} else {
-			res = user.deleteRole(role);
+			res = userAccount.deleteRole(role);
 		}
 		if(res) {
-			userRepository.save(user);
+			userAccountRepository.save(userAccount);
 		}
-		return modelMapper.map(user, RolesDto.class);
+		return modelMapper.map(userAccount, RolesDto.class);
 	}
 
 
 	@Override
 	public void changePassword(String login, String newPassword) {
-		UserAccount user = userRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
-		user.setPassword(newPassword);
-		userRepository.save(user);
+		UserAccount userAccount = userAccountRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
+		String password = BCrypt.hashpw(newPassword, BCrypt.gensalt());
+		userAccount.setPassword(password);
+		userAccountRepository.save(userAccount);
 	}
 	
 
 	@Override
 	public UserDto getUser(String login) {
-		UserAccount user = userRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
-		return modelMapper.map(user, UserDto.class);
+		UserAccount userAccount = userAccountRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
+		return modelMapper.map(userAccount, UserDto.class);
 	}
 
 }

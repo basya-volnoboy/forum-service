@@ -8,7 +8,7 @@ import telran.java48.accounting.dto.UserEditDto;
 public interface UserAccountService {
 	
 	UserDto register(UserRegisterDto userRegisterDto);
-	UserDto login();
+	//UserDto login();
 	UserDto deleteUser(String login);
 	UserDto updateUser(String login, UserEditDto userUpdateDto);
 	public RolesDto changeRoleList(String login, String role, boolean isAddRole);
