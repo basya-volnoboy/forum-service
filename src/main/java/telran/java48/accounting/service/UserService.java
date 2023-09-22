@@ -11,8 +11,9 @@ public interface UserService {
 	UserDto login();
 	UserDto deleteUser(String login);
 	UserDto updateUser(String login, UserUpdateDto userUpdateDto);
-	UserChangeRoleDto addRole(String login, String role);
-	UserChangeRoleDto deleteRole(String login, String role);
-	void changePassword();
+//	UserChangeRoleDto addRole(String login, String role);
+//	UserChangeRoleDto deleteRole(String login, String role);
+	public UserChangeRoleDto changeRoleList(String login, String role, boolean isAddRole);
+	public void changePassword(String login, String newPassword);
 	UserDto getUser(String login);
 }

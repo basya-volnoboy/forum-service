@@ -10,6 +10,7 @@ import telran.java48.accounting.dto.UserChangeRoleDto;
 import telran.java48.accounting.dto.UserDto;
 import telran.java48.accounting.dto.UserRegisterDto;
 import telran.java48.accounting.dto.UserUpdateDto;
+import telran.java48.accounting.dto.exeptions.UserExistsExceprion;
 import telran.java48.accounting.dto.exeptions.UserNotFoundException;
 import telran.java48.accounting.model.User;
 
@@ -22,8 +23,13 @@ public class UserServiceImpl implements UserService{
 	
 	@Override
 	public UserDto register(UserRegisterDto userRegisterDto) {
+		
+		if(userRepository.existsById(userRegisterDto.getLogin())) {
+			throw new UserExistsExceprion();
+		}
 		User user = modelMapper.map(userRegisterDto, User.class);
-		user = userRepository.save(user);
+		user.addRole("USER");
+		userRepository.save(user);
 		return modelMapper.map(user, UserDto.class);
 	}
 
@@ -57,26 +63,42 @@ public class UserServiceImpl implements UserService{
 	}
 
 	@Override
-	public UserChangeRoleDto addRole(String login, String role) {
+	public UserChangeRoleDto changeRoleList(String login, String role, boolean isAddRole) {
 		User user = userRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
-		user.addRole(role);
-		userRepository.save(user);
+		boolean res;
+		if(isAddRole) {
+			res = user.addRole(role);
+		} else {
+			res = user.deleteRole(role);
+		}
+		if(res) {
+			userRepository.save(user);
+		}
 		return modelMapper.map(user, UserChangeRoleDto.class);
 	}
+//	@Override
+//	public UserChangeRoleDto addRole(String login, String role) {
+//		User user = userRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
+//		user.addRole(role);
+//		userRepository.save(user);
+//		return modelMapper.map(user, UserChangeRoleDto.class);
+//	}
+//
+//	@Override
+//	public UserChangeRoleDto deleteRole(String login, String role) {
+//		User user = userRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
+//		user.deleteRole(role);
+//		userRepository.save(user);
+//		return modelMapper.map(user, UserChangeRoleDto.class);
+//	}
 
 	@Override
-	public UserChangeRoleDto deleteRole(String login, String role) {
+	public void changePassword(String login, String newPassword) {
 		User user = userRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
-		user.deleteRole(role);
+		user.setPassword(newPassword);
 		userRepository.save(user);
-		return modelMapper.map(user, UserChangeRoleDto.class);
 	}
-
-	@Override
-	public void changePassword() {
-		// TODO Auto-generated method stub
-		///////////////////////////////////
-	}
+	
 
 	@Override
 	public UserDto getUser(String login) {

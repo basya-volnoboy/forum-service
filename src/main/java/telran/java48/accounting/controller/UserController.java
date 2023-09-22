@@ -48,18 +48,18 @@ public class UserController{
 
 	@PutMapping("/user/{login}/role/{role}")
 	public UserChangeRoleDto addRole(@PathVariable String login, @PathVariable String role) {
-		return userService.addRole(login, role);
+		return userService.changeRoleList(login, role, true);
 	}
 
 	@DeleteMapping("/user/{login}/role/{role}")
 	public UserChangeRoleDto deleteRole(@PathVariable String login, @PathVariable String role) {
-		return userService.deleteRole(login, role);
+		return userService.changeRoleList(login, role, false);
 	}
 
 	@PutMapping("/password")
 	public void changePassword() {
 		// TODO Auto-generated method stub
-		userService.changePassword();
+		//userService.changePassword();
 	}
 
 	@GetMapping("/user/{login}")

@@ -2,6 +2,7 @@ package telran.java48.accounting.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.EqualsAndHashCode;
@@ -13,7 +14,7 @@ import lombok.Setter;
 @EqualsAndHashCode(of = "login")
 @Document(collection = "users")
 public class User {
-
+	@Id
 	String login;
 	@Setter
 	String password;
