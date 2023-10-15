@@ -1,11 +1,16 @@
 package telran.java48.accounting.service;
 
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.mindrot.jbcrypt.BCrypt;
 import org.modelmapper.ModelMapper;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import telran.java48.accounting.dao.UserAccountRepository;
 import telran.java48.accounting.dto.RolesDto;
 import telran.java48.accounting.dto.UserDto;
@@ -17,7 +22,7 @@ import telran.java48.accounting.model.UserAccount;
 
 @Service
 @RequiredArgsConstructor
-public class UserAccountServiceImpl implements UserAccountService{
+public class UserAccountServiceImpl implements UserAccountService, CommandLineRunner{
 	
 	final UserAccountRepository userAccountRepository;
 	final ModelMapper modelMapper;
@@ -70,9 +75,9 @@ public class UserAccountServiceImpl implements UserAccountService{
 		UserAccount userAccount = userAccountRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
 		boolean res;
 		if(isAddRole) {
-			res = userAccount.addRole(role);
+			res = userAccount.addRole(role.toUpperCase());
 		} else {
-			res = userAccount.deleteRole(role);
+			res = userAccount.deleteRole(role.toUpperCase());
 		}
 		if(res) {
 			userAccountRepository.save(userAccount);
@@ -94,6 +99,20 @@ public class UserAccountServiceImpl implements UserAccountService{
 	public UserDto getUser(String login) {
 		UserAccount userAccount = userAccountRepository.findById(login).orElseThrow(() -> new UserNotFoundException());
 		return modelMapper.map(userAccount, UserDto.class);
+	}
+
+	@Override
+	public void run(String... args) throws Exception {
+		if(!userAccountRepository.existsById("admin")) {
+			String password = BCrypt.hashpw("admin", BCrypt.gensalt());
+			Set<String> roleSet = new HashSet<>();
+			roleSet.add("USER");
+			roleSet.add("MODERATOR");
+			roleSet.add("ADMINISTRATOR");
+			UserAccount userAccount = new UserAccount("admin", password, "", "", roleSet);
+			userAccountRepository.save(userAccount);
+		}
+		
 	}
 
 }

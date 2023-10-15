@@ -34,7 +34,7 @@ public class UserAccountController{
 	}
 
 	@PostMapping("/login")
-	public UserDto login(Principal principal) {
+	public UserDto login(Principal principal) { //это обьект который хранит имя пользователя
 		
 		return getUser(principal.getName());
 	}
@@ -45,7 +45,7 @@ public class UserAccountController{
 	}
 
 	@PutMapping("/user/{login}")
-	public UserDto updateUser(@PathVariable String login, UserEditDto userEditDto) {
+	public UserDto updateUser(@PathVariable String login, @RequestBody UserEditDto userEditDto) {
 		return userAccountService.updateUser(login, userEditDto);
 	}
 
